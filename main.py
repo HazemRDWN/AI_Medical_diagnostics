@@ -1,11 +1,16 @@
+import importlib
 from pathlib import Path
+
+import numpy as np
 import pandas as pd
 
-#______________Filling CSV with necessary data______________
+from problem import DiagnosticProblem
 
 DATA_DIR = Path(__file__).parent / "data"
 
-TESTS = [
+#______________Filling CSV with the necessary data______________
+
+tests = [
     ("T1",  "Temperature check",             5,   1, ""),
     ("T2",  "Throat swab (strep test)",      25,  1, ""),
     ("T3",  "Rapid COVID test",              30,  1, ""),
@@ -20,9 +25,9 @@ TESTS = [
     ("T12", "CT scan",                       200, 5, "T5"),
 ]
 
-TEST_ORDER = [t[0] for t in TESTS]
+testOrder = [t[0] for t in tests]
 
-RESULTS = {
+results = {
     "Common Cold":  ["no fever", "negative", "negative", "negative", "normal",   "normal", "normal",  "negative", "normal", "clear",     "yes", "normal"],
     "Flu":          ["fever",    "negative", "negative", "positive", "normal",   "normal", "normal",  "negative", "normal", "clear",     "no",  "normal"],
     "COVID-19":     ["fever",    "negative", "positive", "negative", "normal",   "normal", "normal",  "negative", "normal", "clear",     "no",  "abnormal"],
@@ -37,17 +42,94 @@ def writeDataFiles():
 
     DATA_DIR.mkdir(exist_ok=True)
 
-    # tests.csv
+    #tests.csv
     tests_table = pd.DataFrame(
-        TESTS,
+        tests,
         columns=["test_id", "name", "financial_cost", "risk_cost", "prerequisites"],
     )
     tests_table.to_csv(DATA_DIR / "tests.csv", index=False)
 
-    results_table = pd.DataFrame.from_dict(RESULTS, orient="index", columns=TEST_ORDER)
+    results_table = pd.DataFrame.from_dict(results, orient="index", columns=testOrder)
     results_table.index.name = "disease"
     results_table.to_csv(DATA_DIR / "disease_results.csv")
 
-if __name__ == "__main__":
-    writeDataFiles()
-    print("Data files written to", DATA_DIR)
+#_______________Running the algorithms_______________
+
+patientCases = ["Common Cold", "Bronchitis", "Asthma", "Allergies", "COVID-19"]
+
+AlgorithmFiles = ["bfs", "dfs", "ucs", "ids"]
+
+iterations = 5
+
+plotCase = "Bronchitis"
+
+def loadAlgorithm():
+
+    algorithms = {}
+
+    for name in AlgorithmFiles:
+
+        module_name = f"algorithms.{name}"
+        module = importlib.import_module(module_name)
+        algorithms[name.upper()] = getattr(module, name)
+
+    return algorithms
+
+def run_algorithm(algorithm, problem):
+
+    times = []
+    for _ in range(iterations):
+        result = algorithm(problem)
+        times.append(result["time"])
+    result["time"] = float(np.mean(times))
+    return result
+
+
+def run_experiments():
+    algorithms = loadAlgorithm()
+    if not algorithms:
+        print("Algorithms not loaded yet")
+        return
+
+    #Problem size
+    first_problem = DiagnosticProblem(patientCases[0])
+    print(f"\nNumber of reachable states: {first_problem.count_states()}")
+    print("\nTests:")
+    for test_id, name in first_problem.test_names.items():
+        print(f"  {test_id} = {name} (cost {first_problem.step_costs[test_id]})")
+
+    #Run every algorithm on every patient case
+    rows = []
+    plot_results = {}
+    for case in patientCases:
+        problem = DiagnosticProblem(case)
+        for name, algorithm in algorithms.items():
+            result = run_algorithm(algorithm, problem)
+            path = result["path"]
+            rows.append({
+                "case": case,
+                "algorithm": name,
+                "path": " > ".join(path),
+                "tests": len(path),
+                "total_cost": result["total_cost"],
+                "generated": result["nodes_generated"],
+                "expanded": result["nodes_expanded"],
+                "max_frontier": result["max_frontier"],
+                "time_ms": result["time"] * 1000,
+            })
+            if case == plotCase:
+                plot_results[name] = result
+
+    table = pd.DataFrame(rows)
+    pd.set_option("display.width", 250)
+    pd.set_option("display.max_columns", None)
+    pd.set_option("display.max_colwidth", None)
+
+    print("\nResults for every case:\n")
+    print(table.round({"time_ms": 3}).to_string(index=False))
+
+    print("\nAverage over all cases:\n")
+    summary = table.groupby("algorithm")[
+        ["tests", "total_cost", "generated", "expanded", "max_frontier", "time_ms"]
+    ].mean()
+    print(summary.round(2).to_string())
