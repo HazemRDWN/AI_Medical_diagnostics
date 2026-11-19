@@ -1,0 +1,9 @@
+disease,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12
+Common Cold,no fever,negative,negative,negative,normal,normal,normal,negative,normal,clear,yes,normal
+Flu,fever,negative,negative,positive,normal,normal,normal,negative,normal,clear,no,normal
+COVID-19,fever,negative,positive,negative,normal,normal,normal,negative,normal,clear,no,abnormal
+Strep Throat,fever,positive,negative,negative,normal,high,normal,negative,normal,clear,no,normal
+Bronchitis,no fever,negative,negative,negative,normal,normal,reduced,negative,normal,infection,no,normal
+Pneumonia,fever,negative,negative,negative,abnormal,high,normal,negative,low,infection,no,abnormal
+Asthma,no fever,negative,negative,negative,normal,normal,reduced,positive,low,clear,no,normal
+Allergies,no fever,negative,negative,negative,normal,normal,normal,positive,normal,clear,yes,normal

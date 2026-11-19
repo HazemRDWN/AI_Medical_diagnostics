@@ -1,0 +1,13 @@
+test_id,name,financial_cost,risk_cost,prerequisites
+T1,Temperature check,5,1,
+T2,Throat swab (strep test),25,1,
+T3,Rapid COVID test,30,1,
+T4,Rapid flu test,35,1,
+T5,Chest X-ray,80,3,
+T6,Blood test,50,2,
+T7,Breathing test,70,2,T9
+T8,Allergy skin test,60,2,
+T9,Oxygen level check,12,1,
+T10,Mucus sample test,40,2,
+T11,Runny nose and sneezing check,8,1,
+T12,CT scan,200,5,T5
