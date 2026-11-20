@@ -6,7 +6,7 @@ import pandas as pd
 
 from problem import DiagnosticProblem
 
-DATA_DIR = Path(__file__).parent / "data"
+dataDir = Path(__file__).parent / "data"
 
 #______________Filling CSV with the necessary data______________
 
@@ -40,24 +40,24 @@ results = {
 
 def writeDataFiles():
 
-    DATA_DIR.mkdir(exist_ok=True)
+    dataDir.mkdir(exist_ok=True)
 
     #tests.csv
-    tests_table = pd.DataFrame(
+    testsTable = pd.DataFrame(
         tests,
         columns=["test_id", "name", "financial_cost", "risk_cost", "prerequisites"],
     )
-    tests_table.to_csv(DATA_DIR / "tests.csv", index=False)
+    testsTable.to_csv(dataDir / "tests.csv", index=False)
 
-    results_table = pd.DataFrame.from_dict(results, orient="index", columns=testOrder)
-    results_table.index.name = "disease"
-    results_table.to_csv(DATA_DIR / "disease_results.csv")
+    resultsTable = pd.DataFrame.from_dict(results, orient="index", columns=testOrder)
+    resultsTable.index.name = "disease"
+    resultsTable.to_csv(dataDir / "disease_results.csv")
 
 #_______________Running the algorithms_______________
 
 patientCases = ["Common Cold", "Bronchitis", "Asthma", "Allergies", "COVID-19"]
 
-AlgorithmFiles = ["bfs", "dfs", "ucs", "ids"]
+algorithmFiles = ["bfs", "dfs", "ucs", "ids"]
 
 iterations = 5
 
@@ -67,10 +67,10 @@ def loadAlgorithm():
 
     algorithms = {}
 
-    for name in AlgorithmFiles:
+    for name in algorithmFiles:
 
-        module_name = f"algorithms.{name}"
-        module = importlib.import_module(module_name)
+        moduleName = f"algorithms.{name}"
+        module = importlib.import_module(moduleName)
         algorithms[name.upper()] = getattr(module, name)
 
     return algorithms
@@ -78,7 +78,7 @@ def loadAlgorithm():
 def run_algorithm(algorithm, problem):
 
     times = []
-    for _ in range(iterations):
+    for iterationIndex in range(iterations):
         result = algorithm(problem)
         times.append(result["time"])
     result["time"] = float(np.mean(times))
@@ -92,15 +92,15 @@ def run_experiments():
         return
 
     #Problem size
-    first_problem = DiagnosticProblem(patientCases[0])
-    print(f"\nNumber of reachable states: {first_problem.count_states()}")
+    firstProblem = DiagnosticProblem(patientCases[0])
+    print(f"\nNumber of reachable states: {firstProblem.count_states()}")
     print("\nTests:")
-    for test_id, name in first_problem.test_names.items():
-        print(f"  {test_id} = {name} (cost {first_problem.step_costs[test_id]})")
+    for testId, name in firstProblem.test_names.items():
+        print(f"  {testId} = {name} (cost {firstProblem.step_costs[testId]})")
 
     #Run every algorithm on every patient case
     rows = []
-    plot_results = {}
+    plotResults = {}
     for case in patientCases:
         problem = DiagnosticProblem(case)
         for name, algorithm in algorithms.items():
@@ -118,7 +118,7 @@ def run_experiments():
                 "time_ms": result["time"] * 1000,
             })
             if case == plotCase:
-                plot_results[name] = result
+                plotResults[name] = result
 
     table = pd.DataFrame(rows)
     pd.set_option("display.width", 250)
