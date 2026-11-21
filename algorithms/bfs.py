@@ -9,7 +9,7 @@ def bfs(problem):
     startState = problem.initialState()
 
     # Each frontier entry such as state, list of tests so far, cost so far
-    opened = deque([startState, [], 0])
+    opened = deque([(startState, [], 0)])
 
     seen = {startState}
 
@@ -49,12 +49,11 @@ def bfs(problem):
                 maxOpened = max(maxOpened, len(opened))
 
     return {
-
         "path": solutionPath,
-        "total cost": solutionCost,
-        "nodes generated": generated,
-        "max opened": maxOpened,
+        "total_cost": solutionCost,
+        "nodes_generated": generated,
+        "nodes_expanded": len(closed),
+        "max_frontier": maxOpened,
         "time": time.perf_counter() - startTime,
-        "explored": closed
-
+        "explored": closed,
     }
