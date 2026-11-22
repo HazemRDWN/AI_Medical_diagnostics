@@ -133,3 +133,13 @@ def run_experiments():
         ["tests", "total_cost", "generated", "expanded", "max_frontier", "time_ms"]
     ].mean()
     print(summary.round(2).to_string())
+        # Figures for the report
+    import visualization
+    visualization.plot_explored_states(plotResults, DiagnosticProblem(plotCase))
+    visualization.plot_comparison(table)
+    print("\nFigures saved in the 'figures' folder")
+
+
+if __name__ == "__main__":
+    writeDataFiles()
+    run_experiments()
